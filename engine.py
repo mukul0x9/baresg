@@ -63,51 +63,76 @@ def compile_template(template):
 
     indent = "    "
 
-    loop_state = False
+    scope_track = []
+
+    def resolve_scope_track(context_var):
+        parts = context_var.split(".")
+        root = parts[0]
+        if root in scope_track:
+            final = root
+        else:
+            final = f'context["{root}"]'
+
+        for p in parts[1:]:
+            final += f"['{p}']"
+
+        return final
 
     for token in tokens:
         if token.startswith("{{"):
             var = token[2:-2].strip()
-            if not loop_state:
-                code.append(f'{indent}result.append(str(context["{var}"]))')
-            else:
-                var_value = var.split(".")
 
-                if all(var_value) and len(var) > 1:
-                    root = var_value[0]
-                    rest = var_value[1:]
+            final = resolve_scope_track(var)
 
-                    final_string = root
-
-                    for p in rest:
-                        final_string += f"['{p}']"
-
-                    var = final_string
-
-                code.append(f"{indent}result.append(str({var}))")
+            code.append(f"{indent}result.append(str({final}))")
 
         elif token.startswith("{%"):
             tag = token[2:-2].strip()
 
-            if tag.startswith("if"):
-                condition = tag.split()[1]
+            if tag.startswith("if "):
+                condition = tag[3:].strip()
 
-                code.append(f'{indent}if context["{condition}"]:')
+                final = resolve_scope_track(condition)
+
+                code.append(f"{indent}if {final}:")
+                indent += "    "
+
+            elif tag.startswith("elif "):
+                indent = indent[:-4]
+
+                condition = tag[5:].strip()
+                final = resolve_scope_track(condition)
+
+                code.append(f"{indent}elif {final}:")
                 indent += "    "
 
             elif tag.startswith("endif"):
                 indent = indent[:-4]
 
-            if tag.startswith("for"):
-                # {% for item in items %}
-                _, loop_var, _, context_var = tag.split()
-                code.append(f'{indent}for {loop_var} in context["{context_var}"]:')
+            if tag.startswith("for "):
+                # {% for post in posts.list %}
+
+                parts = tag.split()
+
+                loop_var = parts[1]
+
+                context_var = parts[3]
+
+                final = resolve_scope_track(context_var)
+
+                code.append(f"{indent}for {loop_var} in {final}:")
                 indent += "    "
-                loop_state = True
+                scope_track.append(loop_var)
 
             elif tag.startswith("endfor"):
                 indent = indent[:-4]
-                loop_state = False
+                if scope_track:
+                    scope_track.pop()
+
+            elif tag.startswith("else"):
+                indent = indent[:-4]
+                code.append(f"{indent}else:")
+                indent += "    "
 
         else:
             if token:
@@ -120,7 +145,6 @@ def compile_template(template):
 
 def render_template(generated_code, context):
 
-    print(generated_code)
     safe_builtins = {
         "str": str,
         "int": int,
@@ -134,8 +158,6 @@ def render_template(generated_code, context):
     exec(generated_code, safe_namespace)
 
     render_func = safe_namespace["render_template"]
-
-    print(render_func)
 
     return render_func(context)  # type: ignore
 
@@ -166,61 +188,102 @@ def create_final_html(base_template, final_content):
     return final_html
 
 
-def walk_dir(dir="content"):
-    base_template_path = "templates/base.html"
-    post_template_path = "templates/post.html"
-    index_template_path = "templates/index.html"
+def collect_all_post(dir="content"):
 
-    save_post_path = "posts/"
+    posts = []
 
-    for name in os.listdir(dir):
-        path = os.path.join(dir, name)
+    def walk_post_dir(dir="content"):
+        for name in os.listdir(dir):
+            path = os.path.join(dir, name)
 
-        if os.path.isfile(path):
-            name, ext = os.path.splitext(name)
+            if os.path.isfile(path):
+                name, ext = os.path.splitext(name)
 
-            if ext == ".md":
-                template = read_file(post_template_path)
+                if name != "index" and ext == ".md":
+                    raw_text = read_file(path)
+                    meta_data, _ = parse_meta_data_and_content(raw_text)
 
-                save_output_dir = f"{save_post_path}{name}"
-
-                if name == "index":
-                    template = read_file(index_template_path)
-                    save_output_dir = ""
-
-                raw_text = read_file(path)
-
-                meta_data, markdown_content = parse_meta_data_and_content(raw_text)
-
-                html_content = parse_markdown_content(markdown_content)
-
-                context = {
-                    "title": meta_data.get("title", ""),
-                    "content": html_content,
-                    "date": "02/03/1999",
-                    "posts": [
+                    posts.append(
                         {
-                            "title": "firstPost",
-                            "url": "posts/post1/index.html",
-                            "date": "02/03/9999",
+                            "title": meta_data.get("title", ""),
+                            "url": f"/blog/{name}",
+                            "date": meta_data.get("date", "02/03/1999"),
+                            "source_path": path,
+                            "slug": meta_data.get("slug", name),
                         }
-                    ],
-                }
+                    )
+            else:
+                walk_post_dir(path)
 
-                # page_html = render(template, context)
-
-                function_code_string = compile_template(template)
-
-                html_page = render_template(function_code_string, context)
-
-                final_html = create_final_html(base_template_path, html_page)
-
-                print(final_html)
-
-                # save_output_files(final_html, save_output_dir)
-
-        if os.path.isdir(path):
-            walk_dir(path)
+    walk_post_dir(dir)
+    return posts
 
 
-walk_dir()
+def render_posts(posts):
+    template = read_file("templates/post.html")
+
+    for post in posts:
+        raw_text = read_file(post["source_path"])
+
+        meta_data, markdown_content = parse_meta_data_and_content(raw_text)
+
+        html_content = parse_markdown_content(markdown_content)
+
+        context = {
+            "title": meta_data.get("title", ""),
+            "content": html_content,
+            "date": meta_data.get("date", ""),
+            "posts": posts,
+        }
+
+        function_code_string = compile_template(template)
+
+        html_page = render_template(function_code_string, context)
+
+        final_html = create_final_html("templates/base.html", html_page)
+
+        save_output_files(final_html, f"blog/{post['slug']}")
+
+
+def render_home(posts):
+    template = read_file("templates/index.html")
+    raw_text = read_file("content/index.md")
+    meta_data, markdown_content = parse_meta_data_and_content(raw_text)
+
+    html_content = parse_markdown_content(markdown_content)
+
+    context = {
+        "title": meta_data.get("title", ""),
+        "content": html_content,
+        "date": meta_data.get("date", ""),
+        "posts": posts,
+    }
+
+    function_code_string = compile_template(template)
+
+    html_page = render_template(function_code_string, context)
+
+    final_html = create_final_html("templates/base.html", html_page)
+
+    save_output_files(final_html, "")
+
+
+def render_blog_archive(posts):
+    template = read_file("templates/blog.html")
+
+    context = {"title": "Blog", "posts": posts}
+
+    function_code_string = compile_template(template)
+
+    html_page = render_template(function_code_string, context)
+
+    final_html = create_final_html("templates/base.html", html_page)
+
+    save_output_files(final_html, "blog")
+
+
+all_posts = collect_all_post()
+
+render_posts(all_posts)
+render_home(all_posts)
+render_blog_archive(all_posts)

@@ -1,8 +1,6 @@
 ---
-title: hello world
+title: Hello World
 ---
-
-# Welcome
 
 This is my personal site.
 

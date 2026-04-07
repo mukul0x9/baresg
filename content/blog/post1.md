@@ -5,6 +5,6 @@ author: Me
 tags: python, ssg
 ---
 
-# Hello World
+# first post
 
 This is my content
