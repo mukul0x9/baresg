@@ -1,7 +1,13 @@
 ---
-title: Hello World
+title: ""
+description: "Thoughts on backend systems and programming"
 ---
 
-This is my personal site.
+Hey, I’m Mukul.
 
-Here I write about programming, systems, and what I’m learning.
+I explore how things work, understand them, and write about what I learn.
+
+Open to software engineering roles, focused on backend systems and architecture.
+
+This site is built using my own static site generator:  
+[bearsg](https://github.com/mukul0x9/baresg)

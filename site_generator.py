@@ -7,6 +7,11 @@ from template_engine.engine import Template
 BASE_DIR = os.path.dirname(__file__)
 
 
+def format_date(date_str):
+    date = datetime.strptime(date_str.strip(), "%Y-%m-%d")
+    return date.strftime("%-d %B %Y")
+
+
 def read_file(path):
     with open(os.path.join(BASE_DIR, path), "r", encoding="utf-8") as f:
         return f.read()
@@ -37,12 +42,17 @@ def parse_meta_data_and_content(raw_text):
 
     meta = {}
 
+    def clean(value):
+        return value.strip().strip('"').strip("'")
+
     for data in meta_data.split("\n"):
         if ":" not in data:
             continue
         key, value = data.split(":", 1)
 
-        meta[key] = value
+        key = key.strip()
+
+        meta[key] = clean(value)
 
     return meta, content_data
 
@@ -54,15 +64,19 @@ INDEX_TEMPLATE = Template(read_file("templates/index.html"))
 BLOG_TEMPLATE = Template(read_file("templates/blog.html"))
 
 
-def create_final_html(final_content):
+def create_final_html(final_content, context={}):
 
     # this is combining final html content to base html
-    return BASE_TEMPLATE.render({"content": final_content, "title": "home"})
+    return BASE_TEMPLATE.render(
+        {"content": final_content, "title": context.get("title")}
+    )
 
 
 def collect_all_post(current_dir="content"):
 
     posts = []
+
+    pages = []
 
     def walk_post_dir(current_dir):
         for name in os.listdir(current_dir):
@@ -77,23 +91,57 @@ def collect_all_post(current_dir="content"):
 
                     slug = meta_data.get("slug", name)
 
-                    posts.append(
-                        {
-                            "title": meta_data.get("title", ""),
-                            "url": f"/blog/{slug}",
-                            "date": meta_data.get("date", ""),
-                            "source_path": path,
-                            "slug": slug,
-                        }
-                    )
+                    content_type = meta_data.get("type", "post")
+
+                    item = {
+                        "title": meta_data.get("title", ""),
+                        "slug": slug,
+                        "source_path": path,
+                        "date": meta_data.get("date", ""),
+                        "formatted_date": format_date(meta_data.get("date", "")),
+                    }
+
+                    if content_type == "page":
+                        pages.append(item)
+                    else:
+                        item["url"] = f"/blog/{slug}"
+                        posts.append(item)
+
             else:
                 walk_post_dir(path)
 
     walk_post_dir(current_dir)
 
-    posts.sort(key=lambda x: datetime.strptime(x["date"], "%Y-%m-%d"), reverse=True)
+    def clean_date(date_str):
+        return date_str.strip().strip('"').strip("'")
 
-    return posts
+    posts.sort(
+        key=lambda x: datetime.strptime(clean_date(x["date"]), "%Y-%m-%d"), reverse=True
+    )
+
+    return posts, pages
+
+
+def render_pages(pages):
+
+    for page in pages:
+        raw_text = read_file(page["source_path"])
+
+        meta_data, markdown_content = parse_meta_data_and_content(raw_text)
+
+        html_content = markdown_to_html(markdown_content)
+
+        context = {
+            "title": meta_data.get("title", ""),
+            "content": html_content,
+            "date": format_date(meta_data.get("date", "")),
+        }
+
+        html_page = POST_TEMPLATE.render(context)  # reuse
+
+        final_html = create_final_html(html_page, context)
+
+        save_output_files(final_html, page["slug"])
 
 
 def render_posts(posts):
@@ -108,13 +156,13 @@ def render_posts(posts):
         context = {
             "title": meta_data.get("title", ""),
             "content": html_content,
-            "date": meta_data.get("date", ""),
+            "date": format_date(meta_data.get("date", "")),
             "posts": posts,
         }
 
         html_page = POST_TEMPLATE.render(context)
 
-        final_html = create_final_html(html_page)
+        final_html = create_final_html(html_page, context)
 
         save_output_files(final_html, f"blog/{post['slug']}")
 
@@ -129,31 +177,32 @@ def render_home(posts):
     context = {
         "title": meta_data.get("title", ""),
         "content": html_content,
-        "date": meta_data.get("date", ""),
-        "posts": posts,
+        "posts": posts[:3],
     }
 
     html_page = INDEX_TEMPLATE.render(context)
 
-    final_html = create_final_html(html_page)
+    final_html = create_final_html(html_page, context)
 
     save_output_files(final_html, "")
 
 
 def render_blog_archive(posts):
 
-    context = {"title": "Blog", "posts": posts}
+    context = {"title": "", "posts": posts}
 
     html_page = BLOG_TEMPLATE.render(context)
 
-    final_html = create_final_html(html_page)
+    final_html = create_final_html(html_page, context)
 
     save_output_files(final_html, "blog")
 
 
 def build_site():
-    all_posts = collect_all_post()
+    all_posts, pages = collect_all_post()
+
     render_posts(all_posts)
+    render_pages(pages)
     render_home(all_posts)
     render_blog_archive(all_posts)
 
