@@ -1,77 +1,149 @@
-from .md_ast import Node
+
+class ASTNode:
+    pass
+
+class Document(ASTNode):
+    def __init__(self) -> None:
+        self.children = []
+
+    def __repr__(self) -> str:
+        return f"Document({self.children})"
+   
+class Heading(ASTNode):
+    def __init__(self, level, text):
+        self.level = level
+        self.text = text
+
+    def __repr__(self):
+        return f"Heading({self.level}, {self.text})"
+
+class Bold(ASTNode):
+    def __init__(self, text):
+        self.text = text
+
+    def __repr__(self):
+        return f"Bold({self.text})"
+
+class Italic(ASTNode):
+    def __init__(self, text):
+        self.text = text
+
+    def __repr__(self):
+        return f"Italic({self.text})"
+
+class Link(ASTNode):
+    def __init__(self, text, url):
+        self.text = text
+        self.url = url
+
+    def __repr__(self):
+        return f"Link({self.text}, {self.url})"
+
+class Image(ASTNode):
+    def __init__(self, text, url):
+        self.text = text
+        self.url = url
+
+    def __repr__(self):
+        return f"Image({self.text}, {self.url})"
+
+class List(ASTNode):
+    def __init__(self, items):
+        self.items = items
+
+    def __repr__(self):
+        return f"List({self.items})"
+
+class Paragraph(ASTNode):
+    def __init__(self, text):
+        self.text = text
+
+    def __repr__(self):
+        return f"Paragraph({self.text})"
 
 
-def parse_inline(tokens, i=0, stop_token=None):
-    nodes = []
+class Parser:
+    def __init__(self,tokens) -> None:
+        print(tokens)
 
-    while i < len(tokens):
-        token = tokens[i]
-
-        if stop_token and token.type == stop_token:
-            return nodes, i
-
-        if token.type == "TEXT":
-            nodes.append(Node("TEXT", value=token.value))
-            i += 1
-
-        elif token.type == "BOLD":
-            i += 1
-            children, i = parse_inline(tokens, i, stop_token="BOLD")
-            nodes.append(Node("BOLD", children=children))
-            i += 1
-
-        elif token.type == "ITALIC":
-            i += 1
-            children, i = parse_inline(tokens, i, stop_token="ITALIC")
-            nodes.append(Node("ITALIC", children=children))
-            i += 1
-
-        elif token.type == "CODE":
-            i += 1
-            content = ""
-
-            while i < len(tokens) and tokens[i].type != "CODE":
-                if tokens[i].type == "TEXT":
-                    content += tokens[i].value
-                i += 1
-
-            nodes.append(Node("CODE", value=content))
-            i += 1
-
+        self.tokens = tokens 
+        self.curr_pos = 0
+        self.current_token = self.tokens[self.curr_pos] if self.curr_pos < len(self.tokens) else None
+    def advance_curosr(self):
+        self.curr_pos += 1
+        if self.curr_pos < len(self.tokens):
+            self.current_token = self.tokens[self.curr_pos]
         else:
-            i += 1
+            self.current_token = None
 
-    return nodes, i
+    def parse(self):
+        document = Document()
+
+        while self.current_token:
+            if self.current_token.type == "HEADING":
+                document.children.append(self.parse_heading())
+            elif self.current_token.type == 'BOLD':
+                document.children.append(self.parse_bold())
+            elif self.current_token.type == 'ITALIC':
+                document.children.append(self.parse_italic())
+            elif self.current_token.type == 'LINK':
+                document.children.append(self.parse_link())
+
+            elif self.current_token.type == 'IMAGE':
+                document.children.append(self.parse_image())
+            elif self.current_token.type == 'LIST_ITEM':
+                document.children.append(self.parse_list())
+            elif self.current_token.type == 'PARAGRAPH':
+                document.children.append(self.parse_paragraph())
+            else:  
+                self.advance_curosr()
+        return document
+
+    def parse_heading(self):
+        level , text = self.current_token.value 
+        self.advance_curosr()
+
+        return Heading(level,text)
+
+    def parse_bold(self):
+        value = self.current_token.value
+        self.advance_curosr()
+        return Bold(value)
+
+    def parse_italic(self):
+        value = self.current_token.value 
+        self.advance_curosr()
+        return Italic(value)
+
+    def parse_link(self):
+        text, url = self.current_token.value
+        self.advance_curosr()
+        return Link(text, url)
 
 
-def parse(tokens):
-    nodes = []
-    i = 0
+    def parse_image(self):
+        text, url = self.current_token.value
+        self.advance_curosr()
+        return Image(text, url)
 
-    while i < len(tokens):
-        token = tokens[i]
+    def parse_list(self):
+        items = []
 
-        if token.type == "HEADING":
-            level = token.value
-            i += 1
+        while self.current_token and self.current_token.type == 'LIST_ITEM':
+            item_tokens = [self.current_token.value]
+            self.advance_curosr()
 
-            inline_tokens = []
-            while i < len(tokens) and tokens[i].type != "NEWLINE":
-                inline_tokens.append(tokens[i])
-                i += 1
+            # Only attach paragraphs directly following a list item
+            while self.current_token and self.current_token.type == 'PARAGRAPH':
+                item_tokens.append(self.current_token.value)
+                self.advance_curosr()
 
-            children, _ = parse_inline(inline_tokens)
-            nodes.append(Node("HEADING", value=level, children=children))
+            items.append(" ".join(item_tokens))
 
-        elif token.type != "NEWLINE":
-            inline_tokens = []
-            while i < len(tokens) and tokens[i].type != "NEWLINE":
-                inline_tokens.append(tokens[i])
-                i += 1
+        return List(items)
 
-            children, _ = parse_inline(inline_tokens)
-            nodes.append(Node("PARAGRAPH", children=children))
+    def parse_paragraph(self):
+        value = self.current_token.value 
+        self.advance_curosr()
+        return Paragraph(value)
 
-        i += 1
-
-    return nodes

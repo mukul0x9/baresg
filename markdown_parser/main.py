@@ -1,20 +1,29 @@
-from .lexer import tokenize
-from .parser import parse
-from .renderer import render
+from lexer import Lexer
+from parser import Parser
+from renderer import HTMLGenerator
 
-text = "# Hello **world**"
+# Input Markdown
+markdown_text = """
+# Sample Markdown with Image
 
-tokens = tokenize(text)
-print(tokens)  # debug
+This is a paragraph with **bold** and *italic* text.
 
-nodes = parse(tokens)
-print(nodes)  # debug
+![Van Gogh Style Nike Dunk](https://example.com/van-gogh-dunk.jpg)
 
-html = "".join(render(n) for n in nodes)
-print(html)
+Here’s a [link to Nike](https://www.nike.com).
 
+- List item 1
+- List item 2
+"""
 
-def markdown_to_html(text):
-    tokens = tokenize(text)
-    nodes = parse(tokens)
-    return "".join(render(n) for n in nodes)
+# Lexing -
+lexer = Lexer(markdown_text)
+tokens = lexer.tokenize()
+
+# Parsing
+parser = Parser(tokens)
+ast = parser.parse()
+
+# Generating HTML
+generator = HTMLGenerator()
+html = generator.generate(ast)
