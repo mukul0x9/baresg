@@ -6,24 +6,22 @@ type: "page"
 date: "2026-04-15"
 ---
 
-I’m a software engineer focused on backend systems and architecture.
-
-Currently open to software engineering roles.
+I’m a Backend-focused Software Engineer
 
 ## Skills
-Languages: Python, Node.js (JavaScript, TypeScript)
-Database: PostgreSQL  
-Infra/Tools: Linux, AWS, Prometheus
+-Languages: Python, Node.js (JavaScript, TypeScript)
+-Database: PostgreSQL  
+-Infra/Tools: Linux, AWS, Prometheus
 
-Comfortable working across different tools and systems as needed.
+
+## ***Projects / recreational programming***
+- [baresg](https://github.com/mukul0x9/baresg) — a small static site generator with a custom template engine and markdown parser
+
+
 
 ## Experience
 - Digiqt Technolab, Ahmedabad — Software Engineer  
-  Aug 2021 – Mar 2026  
-  Built backend systems, shipped products end-to-end, improved performance, and handled production issues.
-
-## Projects
-- [bearsg](https://github.com/mukul0x9/baresg) — a small static site generator with a custom template engine and markdown parser
+  Aug 2021 – Mar 2026 
 
 ## Contact
 - Email: mukulmakwana09@gmail.com
