@@ -1,107 +1,172 @@
 <!doctype html>
-<html>
-    <head>
-        <meta charset="UTF-8" />
-        <title>{{ title }}</title>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>{{ title }}</title>
 
-        <style>
-            body {
-                font-family:
-                    system-ui,
-                    -apple-system,
-                    BlinkMacSystemFont,
-                    "Segoe UI",
-                    Roboto,
-                    Ubuntu,
-                    Cantarell,
-                    "Noto Sans",
-                    sans-serif;
-                max-width: 700px;
-                margin: 0 auto;
-                padding: 20px;
-                font-size: 18px;
-                line-height: 1.7;
-            }
+<style>
+:root {
+    --bg: #ffffff;
+    --text: #222222;
+    --muted: #666666;
+    --border: #dddddd;
+    --link:#0066cc;
+}
 
-            a {
-                color: #0366d6;
-                text-decoration: none;
-            }
+[data-theme="dark"] {
+    --bg: #0f1115;
+    --text: #e8e8e8;
+    --muted: #9aa0a6;
+    --border: #2a2f36;
+    --link: lightskyblue;
+}
 
-            a:hover {
-                text-decoration: underline;
-            }
+body {
+    margin: 40px auto;
+    max-width: 750px;
+    padding: 0 16px;
+    font: 19px/1.7 Georgia, serif;
+    color: var(--text);
+    background: var(--bg);
+}
 
-            code,
-            pre {
-                font-family:
-                    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-                    "Liberation Mono", "Courier New", monospace;
-            }
+/* header */
+header {
+    margin-bottom: 3rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+}
 
-            .posts {
-                list-style: none;
-                padding: 0;
-            }
+header a {
+    text-decoration: none;
+    color: inherit;
+}
 
-            .posts li {
-                display: flex;
-                justify-content: space-between;
-                align-items: baseline;
-                padding: 6px 0;
-            }
+nav {
+    font-size: 1.3rem;
+    color: var(--muted);
+}
 
-            .posts .date {
-                color: #777;
-                font-size: 0.9em;
-                white-space: nowrap;
-            }
-            main {
-                font-size: 1.05rem;
-            }
+nav a {
+    margin-right: 12px;
+}
 
-            main h1,
-            main h2,
-            main h3 {
-                margin-top: 1.5em;
-            }
+/* toggle button */
+.toggle {
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--muted);
+    border: none;
+    background: none;
+}
 
-            main p {
-                margin: 1em 0;
-            }
-            header {
-                margin-bottom: 20px;
-                padding-bottom: 10px;
-                border-bottom: 1px solid #eee;
-            }
+/* content */
+h1, h2, h3 {
+    line-height: 1.3;
+    margin: 2rem 0 1rem;
+}
 
-            footer {
-                margin-top: 20px;
-                padding-top: 10px;
-                border-top: 1px solid #eee;
-            }
+p {
+    margin: 1rem 0;
+}
 
-            nav a {
-                margin-right: 10px;
-                text-decoration: none;
-                color: blue;
-            }
-        </style>
-    </head>
+a {
+    color: var(--link);
+    text-decoration: underline;
+}
 
-    <body>
-        <header class="nav">
-            <span class="name">mukul:~</span>
+blockquote {
+    margin: 1.5rem 0;
+    padding-left: 1rem;
+    border-left: 2px solid var(--border);
+    color: var(--muted);
+    font-style: italic;
+}
 
-            <a href="/">home</a>
-            <span>/</span>
-            <a href="/blog/">blog</a>
-            <span>/</span>
-            <a href="/about-me">about</a>
-            <span>/</span>
-            <span class="current">{{ title }}</span>
-        </header>
+img {
+    max-width: 100%;
+    display: block;
+    margin: 1.5rem 0;
+}
 
-        <main>{{ content }}</main>
-    </body>
+/* posts list */
+.posts {
+    list-style: none;
+    padding: 0;
+}
+
+.posts li {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin: 0.5rem 0;
+    padding: 2px 0;
+
+}
+
+
+.date {
+    color: var(--muted);
+    font-size: 0.9rem;
+    white-space: nowrap;
+    min-width: 110px; /* keeps dates aligned vertically */
+}
+
+.posts a {
+    text-decoration: none;
+}
+.toggle{
+    background-color: var(--bg);
+    color: var(--fg);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <div>
+        <a href="/"><strong>Mukul Makwana</strong></a>
+        <nav>
+            <a href="/">Home</a>
+            <a href="/blog/">Blog</a>
+            <a href="/about-me">About</a>
+        </nav>
+    </div>
+    <button class="toggle" onclick="toggleTheme()">dark</button>
+</header>
+
+<main>
+    {{ content }}
+</main>
+
+<script>
+function setTheme(theme) {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("theme", theme);
+
+    const btn = document.querySelector(".toggle");
+    btn.textContent = theme === "dark" ? "light" : "dark";
+}
+
+function toggleTheme() {
+    const current = document.documentElement.getAttribute("data-theme") || "light";
+    const next = current === "dark" ? "light" : "dark";
+    setTheme(next);
+}
+
+// load saved theme
+(function () {
+    const saved = localStorage.getItem("theme") || "light";
+    setTheme(saved);
+})();
+</script>
+
+</body>
 </html>

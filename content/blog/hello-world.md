@@ -13,4 +13,3 @@ This site runs on a small static site generator ([bearsg](https://github.com/muk
 
 The template engine was inspired by this:  
 [A Template Engine — AOSA Book](https://aosabook.org/en/500L/a-template-engine.html)
-

@@ -20,8 +20,7 @@ I’m a Backend-focused Software Engineer
 
 
 ## Experience
-- Digiqt Technolab, Ahmedabad — Software Engineer  
-  Aug 2021 – Mar 2026 
+- Digiqt Technolab, Ahmedabad — Software Engineer(Aug 2021 – Mar 2026 )
 
 ## Contact
 - Email: mukulmakwana09@gmail.com

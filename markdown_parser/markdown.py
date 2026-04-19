@@ -135,7 +135,8 @@ def parse_inline(text):
                 {
                     "node": "Image",
                     "src": "".join(href),
-                    "children": [{"node": "Text", "value": "".join(link_text)}],
+                    "alt": "".join(link_text),
+                    "children": [],
                 }
             )
 
