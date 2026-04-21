@@ -63,6 +63,9 @@ POST_TEMPLATE = Template(read_file("templates/post.html"))
 INDEX_TEMPLATE = Template(read_file("templates/index.html"))
 BLOG_TEMPLATE = Template(read_file("templates/blog.html"))
 
+TAG_INDEX_TEMPLATE = Template(read_file("templates/tags.html"))
+TAG_POST_TEMPALTE = Template(read_file("templates/tag_page.html"))
+
 
 def create_final_html(final_content, context={}):
 
@@ -78,6 +81,8 @@ def collect_all_post(current_dir="content"):
 
     pages = []
 
+    tags_index = {}
+
     def walk_post_dir(current_dir):
         for name in os.listdir(current_dir):
             path = os.path.join(current_dir, name)
@@ -91,15 +96,37 @@ def collect_all_post(current_dir="content"):
 
                     slug = meta_data.get("slug", name)
 
-                    content_type = meta_data.get("type", "post")
+                    tag_string = meta_data.get("tags", None)
 
                     item = {
                         "title": meta_data.get("title", ""),
                         "slug": slug,
                         "source_path": path,
                         "date": meta_data.get("date", ""),
+                        "tags":[],
                         "formatted_date": format_date(meta_data.get("date", "")),
                     }
+
+                    if tag_string:
+                        tag_array = tag_string.split(",")
+
+                        item["tags"] = tag_array
+
+                        for tag in tag_array:
+                            if tag not in tags_index:
+                                tags_index[tag] = []
+
+                            tags_index[tag].append(
+                                {
+                                    "title": meta_data.get("title", ""),
+                                    "url": f"/blog/{slug}",
+                                    "name":tag 
+                                }
+                            )
+
+                    content_type = meta_data.get("type", "post")
+
+                    
 
                     if content_type == "page":
                         pages.append(item)
@@ -119,7 +146,7 @@ def collect_all_post(current_dir="content"):
         key=lambda x: datetime.strptime(clean_date(x["date"]), "%Y-%m-%d"), reverse=True
     )
 
-    return posts, pages
+    return posts, pages, tags_index
 
 
 def render_pages(pages):
@@ -131,10 +158,19 @@ def render_pages(pages):
 
         html_content = markdown_to_html(markdown_content)
 
+        tag_string = meta_data.get("tags", None)
+
+        tags = []
+
+        if tag_string:
+            tags = tag_string.split(",")
+
+
         context = {
             "title": meta_data.get("title", ""),
             "content": html_content,
             "date": format_date(meta_data.get("date", "")),
+            "tags":tags
         }
 
         html_page = POST_TEMPLATE.render(context)  # reuse
@@ -151,12 +187,21 @@ def render_posts(posts):
 
         meta_data, markdown_content = parse_meta_data_and_content(raw_text)
 
+        tag_string = meta_data.get("tags", None)
+
+        tags = []
+
+        if tag_string:
+            tags = tag_string.split(",")
+
+
         html_content = markdown_to_html(markdown_content)
 
         context = {
             "title": meta_data.get("title", ""),
             "content": html_content,
             "date": format_date(meta_data.get("date", "")),
+            "tags":tags, 
             "posts": posts,
         }
 
@@ -187,9 +232,15 @@ def render_home(posts):
     save_output_files(final_html, "")
 
 
-def render_blog_archive(posts):
+def render_blog_archive(posts,tags_index):
 
-    context = {"title": "", "posts": posts}
+    tags_list = []
+
+    for tag in tags_index:
+        value = tags_index[tag]
+        tags_list.append({"name": tag, "count": len(value)})
+
+    context = {"title": "", "posts": posts,"tags":tags_list}
 
     html_page = BLOG_TEMPLATE.render(context)
 
@@ -198,13 +249,37 @@ def render_blog_archive(posts):
     save_output_files(final_html, "blog")
 
 
+def render_tags(tags_index):
+    tags_list = []
+    for tag in tags_index:
+        value = tags_index[tag]
+        tags_list.append({"name": tag, "count": len(value)})
+        html_page = TAG_POST_TEMPALTE.render({"name": tag, "posts": value})
+
+        context = {"title": tag}
+        final_html = create_final_html(html_page, context)
+
+        save_output_files(final_html, f"tags/{tag}")
+
+    html_page = TAG_INDEX_TEMPLATE.render({"tags": tags_list})
+
+    final_html = create_final_html(html_page, {"title": "Tags"})
+
+    save_output_files(final_html, "tags")
+
+
 def build_site():
-    all_posts, pages = collect_all_post()
+    all_posts, pages, tags_index = collect_all_post()
+
+    render_tags(tags_index)
 
     render_posts(all_posts)
+
     render_pages(pages)
+
     render_home(all_posts)
-    render_blog_archive(all_posts)
+
+    render_blog_archive(all_posts,tags_index)
 
 
 if __name__ == "__main__":

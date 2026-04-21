@@ -1,0 +1,9 @@
+<h1>All Tags</h1>
+
+<ul>
+  {% for tag in tags %}
+  <li>
+    <a href="/tags/{{ tag.name }}"> #{{ tag.name }} ({{ tag.count }}) </a>
+  </li>
+  {% endfor %}
+</ul>

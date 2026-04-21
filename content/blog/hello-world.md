@@ -3,6 +3,7 @@ title: "Hello World"
 description: "Starting this blog"
 date: "2026-04-15"
 slug: "hello-world"
+tags: "Hello"
 ---
 
 This is my first post.

@@ -6,4 +6,10 @@
   </p>
 
   <div>{{ content }}</div>
+
+    <div class="tags">
+    {% if tags %} {% for tag in tags %}
+    <a href="/tags/{{ tag }}">#{{ tag }}</a>
+    {% endfor %} {% endif %}
+  </div>
 </article>

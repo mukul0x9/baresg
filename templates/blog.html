@@ -7,3 +7,12 @@
   </li>
   {% endfor %}
 </ul>
+
+<ul class="alltags">
+  {% for tag in tags %}
+  <li>
+    <a href="/tags/{{ tag.name }}"> #{{ tag.name }} ({{ tag.count }}) </a>
+
+  </li>
+  {% endfor %}
+</ul>
