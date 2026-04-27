@@ -28,8 +28,6 @@ Markdown files + Templates
 
 Templates aren't interpreted at render time — they're compiled into Python functions and executed. `compile_template()` scans the template source, translates `{{ variables }}`, `{% if %}`, and `{% for %}` blocks into Python code, then `exec()`s the generated function in a sandboxed namespace with restricted builtins.
 
-This is the same fundamental approach Jinja2 uses internally.
-
 ### What gets built
 
 - Individual post pages → `public/blog/<slug>/index.html`
