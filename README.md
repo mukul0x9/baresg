@@ -1,8 +1,6 @@
 # Baresg
 
-**The world definitely needed another SSG that doesn't work.**
-
-A bare-bones attempt at turning Markdown into blog posts or HTML pages using a compiler approach (that I'm still figuring out as I go)
+A bare-bones attempt at turning Markdown into blog posts or HTML pages.
 ---
 
 ### The "Noob" Execution Model
