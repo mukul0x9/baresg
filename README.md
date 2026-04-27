@@ -24,6 +24,10 @@ Markdown files + Templates
       public/             — static HTML output
 ```
 
+### Markdown parser
+
+Custom tokenizer → block parser → inline parser → HTML renderer pipeline, built without regex for the parsing stage. Handles headings (h1–h6), unordered lists, paragraphs, bold, italic, links, images, and inline code.
+
 ### The template engine
 
 Templates aren't interpreted at render time — they're compiled into Python functions and executed. `compile_template()` scans the template source, translates `{{ variables }}`, `{% if %}`, and `{% for %}` blocks into Python code, then `exec()`s the generated function in a sandboxed namespace with restricted builtins.
