@@ -8,8 +8,10 @@ date: "2026-04-15"
 
 
 ## ***Projects / recreational programming***
-- [baresg](https://github.com/mukul0x9/baresg) — a small static site generator with a custom template engine and markdown parser
 
+-[memdb](https://github.com/mukul0x9/memdb) - In-memory key-value store in Go built without Go maps, using a custom arena allocator, Exposes a TCP server for GET/SET/DEL operations.
+
+- [baresg](https://github.com/mukul0x9/baresg) — a small static site generator with a custom template engine and markdown parser,This site is managed by this custom static site generator.
 
 
 ## Work Experience
