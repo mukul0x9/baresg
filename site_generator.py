@@ -103,7 +103,7 @@ def collect_all_post(current_dir="content"):
                         "slug": slug,
                         "source_path": path,
                         "date": meta_data.get("date", ""),
-                        "tags":[],
+                        "tags": [],
                         "formatted_date": format_date(meta_data.get("date", "")),
                     }
 
@@ -120,13 +120,11 @@ def collect_all_post(current_dir="content"):
                                 {
                                     "title": meta_data.get("title", ""),
                                     "url": f"/blog/{slug}",
-                                    "name":tag 
+                                    "name": tag,
                                 }
                             )
 
                     content_type = meta_data.get("type", "post")
-
-                    
 
                     if content_type == "page":
                         pages.append(item)
@@ -165,12 +163,11 @@ def render_pages(pages):
         if tag_string:
             tags = tag_string.split(",")
 
-
         context = {
             "title": meta_data.get("title", ""),
             "content": html_content,
             "date": format_date(meta_data.get("date", "")),
-            "tags":tags
+            "tags": tags,
         }
 
         html_page = POST_TEMPLATE.render(context)  # reuse
@@ -194,14 +191,13 @@ def render_posts(posts):
         if tag_string:
             tags = tag_string.split(",")
 
-
         html_content = markdown_to_html(markdown_content)
 
         context = {
             "title": meta_data.get("title", ""),
             "content": html_content,
             "date": format_date(meta_data.get("date", "")),
-            "tags":tags, 
+            "tags": tags,
             "posts": posts,
         }
 
@@ -232,7 +228,7 @@ def render_home(posts):
     save_output_files(final_html, "")
 
 
-def render_blog_archive(posts,tags_index):
+def render_blog_archive(posts, tags_index):
 
     tags_list = []
 
@@ -240,7 +236,7 @@ def render_blog_archive(posts,tags_index):
         value = tags_index[tag]
         tags_list.append({"name": tag, "count": len(value)})
 
-    context = {"title": "", "posts": posts,"tags":tags_list}
+    context = {"title": "", "posts": posts, "tags": tags_list}
 
     html_page = BLOG_TEMPLATE.render(context)
 
@@ -279,7 +275,7 @@ def build_site():
 
     render_home(all_posts)
 
-    render_blog_archive(all_posts,tags_index)
+    render_blog_archive(all_posts, tags_index)
 
 
 if __name__ == "__main__":

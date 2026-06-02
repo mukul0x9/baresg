@@ -14,6 +14,3 @@ A collection of books, articles, and resources that have influenced how I think 
 - [third_bit_by_greg_willson](https://third-bit.com/)
 - [bear_blog_discover](https://bearblog.dev/discover/)
 - [simon_wilson](https://simonwillison.net/)
-
-
-

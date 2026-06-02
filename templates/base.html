@@ -6,70 +6,30 @@
         <title>{{ title }}</title>
 
         <style>
-            :root {
-                --bg: #faf9f7;
-                --text: #222222;
-                --muted: #666666;
-                --border: #dddddd;
-                --link: #0066cc;
-            }
-
-            [data-theme="dark"] {
-                --bg: #0f1115;
-                --text: #e8e8e8;
-                --muted: #9aa0a6;
-                --border: #2a2f36;
-                --link: lightskyblue;
-            }
-
             body {
-                margin: 40px auto;
-                max-width: 750px;
-                padding: 0 16px;
                 font:
                     19px/1.7 Georgia,
                     serif;
-                color: var(--text);
-                background: var(--bg);
+                background-color: #f6f6f6;
             }
-
-            /* header */
+            section {
+                max-width: 750px;
+                min-height: 900px;
+                padding: 40px 100px;
+                margin: 0 auto;
+                background-color: white;
+                box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.5);
+            }
             header {
-                margin-bottom: 3rem;
+                margin-bottom: 2rem;
                 display: flex;
                 justify-content: space-between;
                 align-items: baseline;
             }
-
-            header a {
-                text-decoration: none;
-                color: inherit;
-            }
-
-            nav {
-                font-size: 1.3rem;
-                color: var(--muted);
-            }
-
             nav a {
                 margin-right: 12px;
             }
 
-            nav a:hover {
-                border-color: var(--border);
-                color: var(--link);
-            }
-
-            /* toggle button */
-            .toggle {
-                cursor: pointer;
-                font-size: 0.9rem;
-                color: var(--muted);
-                border: none;
-                background: none;
-            }
-
-            /* content */
             h1,
             h2,
             h3 {
@@ -81,26 +41,6 @@
                 margin: 1rem 0;
             }
 
-            a {
-                color: var(--link);
-                text-decoration: underline;
-            }
-
-            blockquote {
-                margin: 1.5rem 0;
-                padding-left: 1rem;
-                border-left: 2px solid var(--border);
-                color: var(--muted);
-                font-style: italic;
-            }
-
-            img {
-                max-width: 100%;
-                display: block;
-                margin: 1.5rem 0;
-            }
-
-            /* posts list */
             .posts {
                 list-style: none;
                 padding: 0;
@@ -115,128 +55,75 @@
             }
 
             .date {
-                color: var(--muted);
+                color: #666666;
                 font-size: 0.9rem;
                 white-space: nowrap;
-                min-width: 110px; /* keeps dates aligned vertically */
+                min-width: 110px;
             }
-
-            .posts a {
-                text-decoration: none;
-            }
-            .toggle {
-                background-color: var(--bg);
-                color: var(--fg);
-                border: 1px solid var(--border);
-                border-radius: 5px;
-                padding: 5px 10px;
-                cursor: pointer;
-            }
-
             .alltags {
                 display: flex;
-                flex-wrap: wrap; /* allows multiple rows if needed */
-                gap: 8px; /* space between tags */
-                list-style: none; /* remove bullets */
+                flex-wrap: wrap;
+                gap: 8px;
+                list-style: none;
                 padding: 0;
                 margin: 10px 0;
             }
-
-            .alltags li {
-                margin: 0;
-            }
-
             .alltags a {
-                display: inline-block; /* makes padding behave properly */
+                display: inline-block;
                 text-decoration: none;
-                padding: 4px 10px;
-                border: 1px solid #ccc;
-                border-radius: 10px;
+                padding: 4px;
+                /*border: 1px solid #ccc;*/
+                background-color: #f0f0f0;
+                /*border-radius: 10px;*/
                 font-size: 14px;
             }
-            @media (max-width: 600px) {
-                body {
-                    margin: 20px auto;
-                    font-size: 16px;
+
+            @media (max-width: 640px) {
+                section {
+                    padding: 24px 20px;
                 }
 
-                /* HEADER STACK */
-                header {
-                    flex-direction: column;
-                    align-items: flex-start;
-                    gap: 10px;
-                }
-
-                nav {
-                    font-size: 1rem;
-                }
-
-                nav a {
-                    margin-right: 8px;
-                }
-
-                /* POSTS STACK */
                 .posts li {
                     flex-direction: column;
-                    align-items: flex-start;
                     gap: 2px;
                 }
 
                 .date {
-                    min-width: unset;
-                    font-size: 0.85rem;
+                    min-width: auto;
+                    font-size: 0.8rem;
                 }
 
-                /* TAGS tighter */
-                .alltags {
-                    gap: 6px;
+                nav {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 10px;
                 }
 
-                .alltags a {
-                    font-size: 12px;
-                    padding: 3px 8px;
+                nav h2 {
+                    width: 100%;
+                    margin-bottom: 6px;
                 }
             }
         </style>
     </head>
 
     <body>
-        <header>
-            <div>
-                <a href="/"><strong>Mukul Makwana</strong></a>
-                <nav>
-                    <a href="/">Home</a>
-                    <a href="/blog/">Blog</a>
-                    <!--<a href="/about-me">About</a>-->
-                </nav>
+        <section class="container wrap">
+            <header>
+                <div class="nav">
+                    <nav>
+                        <h2>Mukul Makwana</h2>
+                        <a href="/">Home</a>
+                        <a href="/blog/">Blog</a>
+
+                        <!--<a href="/about-me">About</a>-->
+                    </nav>
+                </div>
+            </header>
+
+            <div class="main">
+                <main>{{ content }}</main>
             </div>
-            <button class="toggle" onclick="toggleTheme()">dark</button>
-        </header>
-
-        <main>{{ content }}</main>
-
-        <script>
-            function setTheme(theme) {
-                document.documentElement.setAttribute("data-theme", theme);
-                localStorage.setItem("theme", theme);
-
-                const btn = document.querySelector(".toggle");
-                btn.textContent = theme === "dark" ? "light" : "dark";
-            }
-
-            function toggleTheme() {
-                const current =
-                    document.documentElement.getAttribute("data-theme") ||
-                    "light";
-                const next = current === "dark" ? "light" : "dark";
-                setTheme(next);
-            }
-
-            // load saved theme
-            (function () {
-                const saved = localStorage.getItem("theme") || "light";
-                setTheme(saved);
-            })();
-        </script>
+        </section>
     </body>
 </html>

@@ -7,7 +7,7 @@ date: "2026-04-15"
 ---
 
 
-## ***Projects / recreational programming***
+## Projects / recreational programming
 
 -[memdb](https://github.com/mukul0x9/memdb) - In-memory key-value store in Go built without Go maps, using a custom arena allocator, Exposes a TCP server for GET/SET/DEL operations.
 

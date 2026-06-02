@@ -3,9 +3,7 @@ title: ""
 description: "Thoughts on backend systems and programming"
 ---
 
-Hey, I’m Mukul.
-
-## ***Projects / recreational programming***
+## Projects / recreational programming
 
 -[memdb](https://github.com/mukul0x9/memdb) - In-memory key-value store in Go built without Go maps, using a custom arena allocator, Exposes a TCP server for GET/SET/DEL operations.
 
