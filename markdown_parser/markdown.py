@@ -257,13 +257,20 @@ def attach_inline(nodes):
     return nodes
 
 
-def markdown_to_html(raw_text):
-    tokenizer = block_tokenizer(raw_text)
+def markdown_to_html(raw_text, type="mistune"):
 
-    nodes = block_parser(tokenizer)
+    if type == "mistune":
+        import mistune
 
-    final_ast = attach_inline(nodes)
+        return mistune.markdown(raw_text)
+    elif type == "custom":
+        tokenizer = block_tokenizer(raw_text)
+        nodes = block_parser(tokenizer)
 
-    html = render_all(final_ast)
+        final_ast = attach_inline(nodes)
 
-    return html
+        html = render_all(final_ast)
+
+        return html
+    else:
+        raise ValueError(f"Unknown type: {type}")
