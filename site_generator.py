@@ -1,4 +1,5 @@
 import os
+import shutil
 from datetime import datetime
 
 from markdown_parser.markdown import markdown_to_html
@@ -66,12 +67,18 @@ BLOG_TEMPLATE = Template(read_file("templates/blog.html"))
 TAG_INDEX_TEMPLATE = Template(read_file("templates/tags.html"))
 TAG_POST_TEMPALTE = Template(read_file("templates/tag_page.html"))
 
+SITE_URL = "https://mukul0x9.pages.dev"
+
 
 def create_final_html(final_content, context={}):
 
     # this is combining final html content to base html
     return BASE_TEMPLATE.render(
-        {"content": final_content, "title": context.get("title")}
+        {
+            "content": final_content,
+            "title": context.get("title"),
+            "canonical_url": context.get("canonical_url", SITE_URL),
+        }
     )
 
 
@@ -168,6 +175,7 @@ def render_pages(pages):
             "content": html_content,
             "date": format_date(meta_data.get("date", "")),
             "tags": tags,
+            "canonical_url": f"{SITE_URL}/blog/{page['slug']}/",
         }
 
         html_page = POST_TEMPLATE.render(context)  # reuse
@@ -199,6 +207,7 @@ def render_posts(posts):
             "date": format_date(meta_data.get("date", "")),
             "tags": tags,
             "posts": posts,
+            "canonical_url": f"{SITE_URL}/blog/{post['slug']}/",
         }
 
         html_page = POST_TEMPLATE.render(context)
@@ -219,6 +228,7 @@ def render_home(posts):
         "title": meta_data.get("title", ""),
         "content": html_content,
         "posts": posts[:3],
+        "canonical_url": f"{SITE_URL}/",
     }
 
     html_page = INDEX_TEMPLATE.render(context)
@@ -236,7 +246,12 @@ def render_blog_archive(posts, tags_index):
         value = tags_index[tag]
         tags_list.append({"name": tag, "count": len(value)})
 
-    context = {"title": "", "posts": posts, "tags": tags_list}
+    context = {
+        "title": "",
+        "posts": posts,
+        "tags": tags_list,
+        "canonical_url": f"{SITE_URL}/blog/",
+    }
 
     html_page = BLOG_TEMPLATE.render(context)
 
@@ -252,16 +267,131 @@ def render_tags(tags_index):
         tags_list.append({"name": tag, "count": len(value)})
         html_page = TAG_POST_TEMPALTE.render({"name": tag, "posts": value})
 
-        context = {"title": tag}
+        context = {"title": tag, "canonical_url": f"{SITE_URL}/tags/{tag}/"}
         final_html = create_final_html(html_page, context)
 
         save_output_files(final_html, f"tags/{tag}")
 
     html_page = TAG_INDEX_TEMPLATE.render({"tags": tags_list})
 
-    final_html = create_final_html(html_page, {"title": "Tags"})
+    final_html = create_final_html(
+        html_page, {"title": "Tags", "canonical_url": f"{SITE_URL}/tags/"}
+    )
 
     save_output_files(final_html, "tags")
+
+
+def get_all_urls(posts, pages):
+    urls = [
+        {
+            "loc": f"{SITE_URL}/",
+            "lastmod": datetime.now().strftime("%Y-%m-%d"),
+        },
+        {
+            "loc": f"{SITE_URL}/blog/",
+            "lastmod": datetime.now().strftime("%Y-%m-%d"),
+        },
+    ]
+
+    for post in posts:
+        urls.append(
+            {
+                "loc": f"{SITE_URL}/blog/{post['slug']}/",
+                "lastmod": post["date"],
+            }
+        )
+
+    for page in pages:
+        urls.append(
+            {
+                "loc": f"{SITE_URL}/{page['slug']}/",
+                "lastmod": page["date"],
+            }
+        )
+
+    return urls
+
+
+def generate_sitemap(posts, pages):
+
+    urls = get_all_urls(posts, pages)
+
+    xml = ['<?xml version="1.0" encoding="UTF-8"?>']
+
+    xml.append('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">')
+
+    for url in urls:
+        xml.append("<url>")
+        xml.append(f"<loc>{url['loc']}</loc>")
+        xml.append(f"<lastmod>{url['lastmod']}</lastmod>")
+        xml.append("</url>")
+
+    xml.append("</urlset>")
+
+    with open("public/sitemap.xml", "w") as f:
+        f.write("\n".join(xml))
+
+
+def generate_robots_txt():
+
+    robots = f"""User-agent: *
+Allow: /
+
+Sitemap: {SITE_URL}/sitemap.xml
+"""
+
+    with open("public/robots.txt", "w") as f:
+        f.write(robots)
+
+
+def generate_rss(posts):
+
+    xml = ['<?xml version="1.0" encoding="UTF-8"?>']
+
+    xml.append('<rss version="2.0">')
+    xml.append("<channel>")
+
+    xml.append("<title>Mukul Blog</title>")
+    xml.append(f"<link>{SITE_URL}</link>")
+    xml.append("<description>Technical blog</description>")
+
+    for post in posts[:20]:
+        post_url = f"{SITE_URL}/blog/{post['slug']}/"
+
+        pub_date = datetime.strptime(post["date"], "%Y-%m-%d").strftime(
+            "%a, %d %b %Y 00:00:00 GMT"
+        )
+
+        xml.append("<item>")
+
+        xml.append(f"<title>{post['title']}</title>")
+        xml.append(f"<link>{post_url}</link>")
+        xml.append(f"<guid>{post_url}</guid>")
+        xml.append(f"<pubDate>{pub_date}</pubDate>")
+
+        xml.append("</item>")
+
+    xml.append("</channel>")
+    xml.append("</rss>")
+
+    with open("public/rss.xml", "w") as f:
+        f.write("\n".join(xml))
+
+
+def copy_static_assets():
+
+    static_dir = "static"
+    public_dir = "public"
+
+    if not os.path.exists(static_dir):
+        return
+
+    for item in os.listdir(static_dir):
+        src = os.path.join(static_dir, item)
+        dst = os.path.join(public_dir, item)
+
+        if os.path.isfile(src):
+            shutil.copy2(src, dst)
 
 
 def build_site():
@@ -276,6 +406,14 @@ def build_site():
     render_home(all_posts)
 
     render_blog_archive(all_posts, tags_index)
+
+    generate_sitemap(all_posts, pages)
+
+    generate_rss(all_posts)
+
+    generate_robots_txt()
+
+    copy_static_assets()
 
 
 if __name__ == "__main__":
