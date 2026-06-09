@@ -11,9 +11,8 @@ when using an in-memory db like redis or memcached i used to think — isn't thi
 so i thought, let's actually explore the internals and attempt to build a bare-bones version from scratch. i chose golang because i was exploring golang and its concurrency model.
 
 ## naive approach
-started with go's native map with basic set/get/del over tcp. added goroutines per connection for concurrent requests. then the obvious problem — multiple goroutines reading and writing the same map. added a single mutex. works, but now every operation locks the entire table.
+started with go's native map with basic set/get/del over tcp. added goroutines per connection for concurrent requests. then the obvious problem — multiple goroutines reading and writing the same map. added a single mutex. works, but now every operation locks the entire table. anyway, was exploring different hash table implementations and came across a byte array approach from internet and decided to implement it and see what problems come up building from scratch.
 
-also wanted to understand go's gc behavior on heap-heavy structures, so decided to implement a custom hash table and measure the difference.
 
 ## hash table 101
 the basic idea is, hash the key, get an integer, use it as an array index. same key always hashes to the same index so avg-case lookups are O(1). but two different keys can hash to the same index, so we use chaining to store multiple values at the same index. like you can create object/struct to store key/value pairs with next pointer to next struct/object in chain. so now same index can store multiple key/value pairs via chaining (linked list). for collision resolution,there are other techniques as well like open addressing etc. 
