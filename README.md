@@ -2,8 +2,6 @@
 
 A static site generator built from scratch in Python
 
-The goal wasn't to ship a tool. It was to understand how the pieces actually work.
-
 ---
 
 ## How it works
@@ -32,7 +30,7 @@ Custom tokenizer → block parser → inline parser → HTML renderer pipeline, 
 
 Templates aren't interpreted at render time — they're compiled into Python functions and executed. `compile_template()` scans the template source, translates `{{ variables }}`, `{% if %}`, and `{% for %}` blocks into Python code, then `exec()`s the generated function in a sandboxed namespace with restricted builtins.
 
-### What gets built
+### final output
 
 - Individual post pages → `public/blog/<slug>/index.html`
 - Static pages → `public/<slug>/index.html`
@@ -69,7 +67,7 @@ tags: python,web
 type: post
 ---
 
-Your content here.
+content....
 ```
 
 `type: page` generates a static page. Everything else is treated as a blog post.
