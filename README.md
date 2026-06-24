@@ -1,6 +1,6 @@
 # Baresg
 
-A static site generator built from scratch in Python — no external dependencies, no frameworks, nothing outside the standard library.
+A static site generator built from scratch in Python
 
 The goal wasn't to ship a tool. It was to understand how the pieces actually work.
 
