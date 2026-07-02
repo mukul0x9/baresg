@@ -13,7 +13,7 @@ Markdown files + Templates
   [ Frontmatter parser ]  — extracts title, date, slug, tags, type
          │
          ▼
-  [ Markdown → HTML ]     — custom parser, stdlib only
+  [ Markdown → HTML ]     —  parse markdown to html
          │
          ▼
   [ Template engine ]     — compiles templates into Python functions, executes them
@@ -28,7 +28,7 @@ Custom tokenizer → block parser → inline parser → HTML renderer pipeline, 
 
 ### The template engine
 
-Templates aren't interpreted at render time — they're compiled into Python functions and executed. `compile_template()` scans the template source, translates `{{ variables }}`, `{% if %}`, and `{% for %}` blocks into Python code, then `exec()`s the generated function in a sandboxed namespace with restricted builtins.
+Templates are compiled into Python functions and executed. `compile_template()` scans the template source, translates `{{ variables }}`, `{% if %}`, and `{% for %}` blocks into Python code, then `exec()`s the generated function in a sandboxed namespace with restricted builtins.
 
 ### final output
 
@@ -102,4 +102,4 @@ Output lands in `public/`.
 
 ## Influenced by
 
-[A Template Engine — 500 Lines or Less](https://aosabook.org/en/500L/a-template-engine.html) by Ned Batchelder.
+[A Template Engine — 500 Lines or Less](https://aosabook.org/en/500L/a-template-engine.html)

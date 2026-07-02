@@ -1,94 +1,151 @@
 <!doctype html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <link
-            rel="alternate"
-            type="application/rss+xml"
-            title="RSS Feed"
-            href="/rss.xml"
-        />
-        <link rel="canonical" href="{{ canonical_url }}" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>{{ title }}</title>
 
-        <style>
-            body {
-                font:
-                    19px/1.7 Georgia,
-                    serif;
-                background-color: ghostwhite;
-            }
+<head>
+    <meta charset="UTF-8" />
+    <link rel="alternate" type="application/rss+xml" title="RSS Feed" href="/rss.xml" />
+    <link rel="canonical" href="{{ canonical_url }}" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ title }}</title>
+
+    <style>
+        body {
+            font-family: Georgia, serif;
+            background-color: #ffffff;
+        }
+
+
+        pre {
+            background: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+            box-sizing: border-box;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .08);
+        }
+
+        pre code {
+            display: block;
+            white-space: pre;
+            font-family: "SFMono-Regular", Consolas, Monaco, monospace;
+            font-size: 0.9rem;
+        }
+
+
+
+        section {
+            max-width: 750px;
+            min-height: 900px;
+            padding: 40px 100px;
+            margin: 0 auto;
+        }
+
+        header {
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+
+        nav a {
+            margin-right: 12px;
+        }
+
+        h1,
+        h2,
+        h3 {
+            line-height: 1.3;
+            margin: 2rem 0 1rem;
+        }
+
+        p {
+            margin: 1rem 0;
+        }
+
+        .posts {
+            list-style: none;
+            padding: 0;
+        }
+
+        .posts li {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            margin: 0.5rem 0;
+            padding: 2px 0;
+        }
+
+        .date {
+            color: #666666;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            min-width: 110px;
+        }
+
+        .alltags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            list-style: none;
+            padding: 0;
+            margin: 10px 0;
+        }
+
+        .alltags a {
+            display: inline-block;
+            text-decoration: none;
+            padding: 4px;
+            /*border: 1px solid #ccc;*/
+            background-color: #f0f0f0;
+            /*border-radius: 10px;*/
+            font-size: 14px;
+        }
+
+
+        @media (max-width: 768px) {
+
             pre {
-                border: 1px solid #ddd;
-                box-shadow: 5px 5px;
-                padding: 1em;
-                overflow-x: auto;
+                padding: 12px;
+                border-radius: 6px;
+                font-size: 0.85rem;
+
+                margin-left: -8px;
+                margin-right: -8px;
             }
+
+            body {
+                font-size: 17px;
+            }
+
             section {
-                max-width: 750px;
-                min-height: 900px;
-                padding: 40px 100px;
-                margin: 0 auto;
-                background-color: ghostwhite;
-                box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.5);
+                padding: 24px 20px;
             }
+
             header {
-                margin-bottom: 2rem;
-                display: flex;
-                justify-content: space-between;
-                align-items: baseline;
-            }
-            nav a {
-                margin-right: 12px;
-            }
-
-            h1,
-            h2,
-            h3 {
-                line-height: 1.3;
-                margin: 2rem 0 1rem;
-            }
-
-            p {
-                margin: 1rem 0;
-            }
-
-            .posts {
-                list-style: none;
-                padding: 0;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.75rem;
             }
 
             .posts li {
-                display: flex;
-                align-items: baseline;
-                gap: 12px;
-                margin: 0.5rem 0;
-                padding: 2px 0;
+                flex-direction: column;
+                gap: 4px;
             }
 
             .date {
-                color: #666666;
-                font-size: 0.9rem;
-                white-space: nowrap;
-                min-width: 110px;
+                min-width: auto;
             }
-            .alltags {
+
+            nav {
                 display: flex;
                 flex-wrap: wrap;
                 gap: 8px;
-                list-style: none;
-                padding: 0;
-                margin: 10px 0;
             }
-            .alltags a {
-                display: inline-block;
-                text-decoration: none;
-                padding: 4px;
-                /*border: 1px solid #ccc;*/
-                background-color: #f0f0f0;
-                /*border-radius: 10px;*/
-                font-size: 14px;
+
+            nav a {
+                margin-right: 0;
             }
 
             @media (max-width: 640px) {
@@ -117,26 +174,28 @@
                     margin-bottom: 6px;
                 }
             }
-        </style>
-    </head>
+        }
+    </style>
+</head>
 
-    <body>
-        <section class="container wrap">
-            <header>
-                <div class="nav">
-                    <nav>
-                        <h2>Mukul Makwana</h2>
-                        <a href="/">Home</a>
-                        <a href="/blog/">Blog</a>
+<body>
+    <section class="container wrap">
+        <header>
+            <div class="nav">
+                <nav>
+                    <h2>Mukul Makwana</h2>
+                    <a href="/">Home</a>
+                    <a href="/blog/">Blog</a>
 
-                        <a href="/about">About</a>
-                    </nav>
-                </div>
-            </header>
-
-            <div class="main">
-                <main>{{ content }}</main>
+                    <a href="/about">About</a>
+                </nav>
             </div>
-        </section>
-    </body>
+        </header>
+
+        <div class="main">
+            <main>{{ content }}</main>
+        </div>
+    </section>
+</body>
+
 </html>

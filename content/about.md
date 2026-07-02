@@ -15,8 +15,6 @@ building, breaking, and gluing things together.
 - [baresg](https://github.com/mukul0x9/baresg) — a small static site generator with a custom template engine,This site is managed by this custom static site generator.
 
 
-## Work Experience
-- Digiqt Technolab, Ahmedabad — Software Developer(Aug 2021 – Mar 2026 )
 
 ## contact
 
