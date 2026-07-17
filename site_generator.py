@@ -4,6 +4,7 @@ from datetime import datetime
 
 from markdown_parser.markdown import markdown_to_html
 from template_engine.engine import Template
+from xml.sax.saxutils import escape
 
 BASE_DIR = os.path.dirname(__file__)
 
@@ -61,7 +62,7 @@ def parse_meta_data_and_content(raw_text):
 BASE_TEMPLATE = Template(read_file("templates/base.html"))
 
 POST_TEMPLATE = Template(read_file("templates/post.html"))
-INDEX_TEMPLATE = Template(read_file("templates/index.html"))
+#INDEX_TEMPLATE = Template(read_file("templates/index.html"))
 BLOG_TEMPLATE = Template(read_file("templates/blog.html"))
 
 TAG_INDEX_TEMPLATE = Template(read_file("templates/tags.html"))
@@ -70,7 +71,9 @@ TAG_POST_TEMPALTE = Template(read_file("templates/tag_page.html"))
 SITE_URL = "https://mukul0x9.pages.dev"
 
 
-def create_final_html(final_content, context={}):
+def create_final_html(final_content, context=None):
+    if context is None:
+        context = {}
 
     # this is combining final html content to base html
     return BASE_TEMPLATE.render(
@@ -115,7 +118,7 @@ def collect_all_post(current_dir="content"):
                     }
 
                     if tag_string:
-                        tag_array = tag_string.split(",")
+                        tag_array = [t.strip() for t in tag_string.split(",") if t.strip()]
 
                         item["tags"] = tag_array
 
@@ -217,47 +220,51 @@ def render_posts(posts):
         save_output_files(final_html, f"blog/{post['slug']}")
 
 
-def render_home(posts):
+# def render_home(posts):
 
-    raw_text = read_file("content/index.md")
-    meta_data, markdown_content = parse_meta_data_and_content(raw_text)
+#     raw_text = read_file("content/index.md")
+#     meta_data, markdown_content = parse_meta_data_and_content(raw_text)
 
-    html_content = markdown_to_html(markdown_content)
+#     html_content = markdown_to_html(markdown_content)
 
-    context = {
-        "title": meta_data.get("title", ""),
-        "content": html_content,
-        "posts": posts[:3],
-        "canonical_url": f"{SITE_URL}/",
-    }
+#     context = {
+#         "title": meta_data.get("title", ""),
+#         "content": html_content,
+#         "posts": posts[:3],
+#         "canonical_url": f"{SITE_URL}/",
+#     }
 
-    html_page = INDEX_TEMPLATE.render(context)
+#     html_page = INDEX_TEMPLATE.render(context)
 
-    final_html = create_final_html(html_page, context)
+#     final_html = create_final_html(html_page, context)
 
-    save_output_files(final_html, "")
+#     save_output_files(final_html, "")
 
 
 def render_blog_archive(posts, tags_index):
 
     tags_list = []
 
-    for tag in tags_index:
-        value = tags_index[tag]
-        tags_list.append({"name": tag, "count": len(value)})
+    tags_list = sorted(
+        (
+            {"name": tag, "count": len(posts)}
+            for tag, posts in tags_index.items()
+        ),
+        key=lambda x: (-x["count"], x["name"])
+    )
 
     context = {
         "title": "",
         "posts": posts,
         "tags": tags_list,
-        "canonical_url": f"{SITE_URL}/blog/",
+        "canonical_url": f"{SITE_URL}/",
     }
 
     html_page = BLOG_TEMPLATE.render(context)
 
     final_html = create_final_html(html_page, context)
 
-    save_output_files(final_html, "blog")
+    save_output_files(final_html, "")
 
 
 def render_tags(tags_index):
@@ -281,16 +288,12 @@ def render_tags(tags_index):
     save_output_files(final_html, "tags")
 
 
-def get_all_urls(posts, pages):
+def get_all_urls(posts, pages,tags_index):
     urls = [
         {
             "loc": f"{SITE_URL}/",
             "lastmod": datetime.now().strftime("%Y-%m-%d"),
-        },
-        {
-            "loc": f"{SITE_URL}/blog/",
-            "lastmod": datetime.now().strftime("%Y-%m-%d"),
-        },
+        }
     ]
 
     for post in posts:
@@ -309,12 +312,20 @@ def get_all_urls(posts, pages):
             }
         )
 
+    for tag in tags_index:
+        urls.append(
+            {
+                "loc": f"{SITE_URL}/tags/{tag}/",
+                "lastmod": datetime.now().strftime("%Y-%m-%d"),
+            }
+        )
+
     return urls
 
 
-def generate_sitemap(posts, pages):
+def generate_sitemap(posts, pages,tags_index):
 
-    urls = get_all_urls(posts, pages)
+    urls = get_all_urls(posts, pages,tags_index)
 
     xml = ['<?xml version="1.0" encoding="UTF-8"?>']
 
@@ -343,40 +354,55 @@ Sitemap: {SITE_URL}/sitemap.xml
     with open("public/robots.txt", "w") as f:
         f.write(robots)
 
-
 def generate_rss(posts):
 
     xml = ['<?xml version="1.0" encoding="UTF-8"?>']
 
-    xml.append('<rss version="2.0">')
+    xml.append(
+        '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">'
+    )
+
     xml.append("<channel>")
 
-    xml.append("<title>Mukul Blog</title>")
+    xml.append("<title>Mukul Makwana</title>")
     xml.append(f"<link>{SITE_URL}</link>")
-    xml.append("<description>Technical blog</description>")
+    xml.append("<description>Personal Blog</description>")
+    xml.append("<language>en-us</language>")
+
+    xml.append(
+        f'<atom:link href="{SITE_URL}/rss.xml" rel="self" type="application/rss+xml" />'
+    )
 
     for post in posts[:20]:
+
+        raw_text = read_file(post["source_path"])
+        meta, _ = parse_meta_data_and_content(raw_text)
+
         post_url = f"{SITE_URL}/blog/{post['slug']}/"
 
-        pub_date = datetime.strptime(post["date"], "%Y-%m-%d").strftime(
-            "%a, %d %b %Y 00:00:00 GMT"
-        )
+        pub_date = datetime.strptime(
+            post["date"], "%Y-%m-%d"
+        ).strftime("%a, %d %b %Y 00:00:00 GMT")
+
+        title = escape(post["title"])
+        summary = escape(meta.get("summary", ""))
 
         xml.append("<item>")
-
-        xml.append(f"<title>{post['title']}</title>")
+        xml.append(f"<title>{title}</title>")
         xml.append(f"<link>{post_url}</link>")
         xml.append(f"<guid>{post_url}</guid>")
         xml.append(f"<pubDate>{pub_date}</pubDate>")
+
+        if summary:
+            xml.append(f"<description>{summary}</description>")
 
         xml.append("</item>")
 
     xml.append("</channel>")
     xml.append("</rss>")
 
-    with open("public/rss.xml", "w") as f:
+    with open("public/rss.xml", "w", encoding="utf-8") as f:
         f.write("\n".join(xml))
-
 
 def copy_static_assets():
 
@@ -403,11 +429,10 @@ def build_site():
 
     render_pages(pages)
 
-    render_home(all_posts)
+    # render_home(all_posts)
 
-    render_blog_archive(all_posts, tags_index)
-
-    generate_sitemap(all_posts, pages)
+    render_blog_archive(all_posts, tags_index) 
+    generate_sitemap(all_posts, pages,tags_index)
 
     generate_rss(all_posts)
 
