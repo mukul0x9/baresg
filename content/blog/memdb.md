@@ -57,7 +57,7 @@ the structure is append only in data array. so delete wont remove specific entry
 tombstone entries gonna accumulate and waste the memory space. added one compaction function which rebuilds the shard by skipping tombstone entries and this compaction is triggered when memory usage crosses a threshold. but it also locks the shard so it's a trade off.
 
 ## conclusion
-the single mutex was the biggest bottleneck — not the hash function or collision handling. sharding reduced contention more than anything else. built this purely for learning — but exploring memory management, concurrency, and go internals all at once was quite fun. 
+built this purely for learning — but exploring memory management, concurrency, and go internals all at once was quite fun.
 
 ## did it actually help?
 
@@ -70,7 +70,7 @@ max concurrent mark: native map ~113ms, custom hash table ~7.8ms.
 
 native map wins on throughput and STW pause.
 
-the one place custom hash table wins is concurrent mark duration 113ms(native map) vs 7.8ms. native map has more pointers for GC to trace than the custom hash table.
+concurrent mark duration 113ms(native map) vs 7.8ms.
 
 ## what's missing
 - no persistent storage, data is lost on restart
