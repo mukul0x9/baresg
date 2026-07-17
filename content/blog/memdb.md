@@ -3,6 +3,7 @@ title: "I Thought Redis Was Just a HashMap"
 description: "a custom hash table implementation in golang"
 date: "2026-06-04"
 slug: "memdb"
+summary: Building an in-memory database in Go.
 tags: "recreational-programming,db"
 ---
 
