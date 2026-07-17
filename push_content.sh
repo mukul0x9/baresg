@@ -3,7 +3,7 @@ set -e
 
 source .venv/bin/activate
 
-python3 site_generator.py
+python3 generate.py
 
 rsync -av --delete --exclude '.git/' public/ ../mukul0x9.github.io/
 
